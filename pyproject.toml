@@ -1,0 +1,103 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# PROJECT METADATA
+# ─────────────────────────────────────────────────────────────────────────────
+[project]
+name = "ai-research-assistant-api"
+version = "0.1.0"
+description = "Production-grade RAG API with FastAPI, pgvector, and Gemini"
+requires-python = ">=3.12"  
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRODUCTION DEPENDENCIES
+# ─────────────────────────────────────────────────────────────────────────────
+dependencies = [
+    # Core web framework — async-first, OpenAPI auto-docs built in
+    "fastapi>=0.115.0,<1.0.0",
+
+    # ASGI server with uvloop (faster event loop) + websocket support
+    "uvicorn[standard]>=0.30.0,<1.0.0",
+
+    # Data validation library — FastAPI is built on top of Pydantic v2
+    "pydantic>=2.8.0,<3.0.0",
+
+    # Plugin that adds .env file + environment variable loading to Pydantic
+    "pydantic-settings>=2.4.0,<3.0.0",
+
+    # Required by FastAPI to parse multipart/form-data (file uploads in Step 4)
+    "python-multipart>=0.0.9,<1.0.0",
+
+    # Faster JSON serializer (replaces stdlib json) — used as FastAPI default
+    "orjson>=3.10.0,<4.0.0",
+
+    # Structured (JSON-based) logging — produces machine-readable logs for
+    # log aggregators like Datadog, CloudWatch, Loki
+    "structlog>=24.0.0,<25.0.0",
+
+    # Async HTTP client — used for calling external APIs, testing
+    "httpx>=0.27.0,<1.0.0",
+
+    # Retry library with exponential backoff — wraps Gemini API calls
+    # so transient failures don't crash the pipeline (Step 6, 9)
+    "tenacity>=8.5.0,<9.0.0",
+
+    # Google's unified AI SDK — handles both embedding + LLM calls
+    # NOTE: use google-genai, NOT google-generativeai (that's deprecated)
+    "google-genai>=1.0.0,<2.0.0",
+]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEVELOPMENT-ONLY DEPENDENCIES
+# Optional group — install with: pip install -e ".[dev]"
+# ─────────────────────────────────────────────────────────────────────────────
+[project.optional-dependencies]
+dev = [
+    # Test runner with async support
+    "pytest>=8.0.0,<9.0.0",
+    "pytest-asyncio>=0.23.0,<1.0.0",
+
+    # HTTP test client that works with FastAPI (wraps httpx)
+    "httpx>=0.27.0,<1.0.0",
+
+    # Ruff = Rust-powered linter + formatter. Replaces flake8, isort, black
+    # in a single tool that runs ~100x faster
+    "ruff>=0.6.0,<1.0.0",
+
+    # Static type checker — catches bugs before runtime
+    "mypy>=1.11.0,<2.0.0",
+
+    # Runs linter/formatter automatically before every git commit
+    "pre-commit>=3.8.0,<4.0.0",
+]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BUILD SYSTEM
+# Tells pip HOW to install this package
+# ─────────────────────────────────────────────────────────────────────────────
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUFF CONFIG — Linter rules we enforce
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes (undefined names, unused imports)
+    "I",     # isort (import ordering)
+    "B",     # flake8-bugbear (common bugs and design issues)
+    "UP",    # pyupgrade (use modern Python syntax)
+    "N",     # pep8-naming (naming conventions)
+    "ASYNC", # async-specific rules (e.g., no blocking calls in async functions)
+]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PYTEST CONFIG
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+asyncio_mode = "auto"   # All async test functions run without @pytest.mark.asyncio
+testpaths = ["tests"]   # Only look for tests in the /tests folder
