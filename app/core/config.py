@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +28,25 @@ class Settings(BaseSettings):
 
     # CORS
     cors_origins: list[str] = Field(default_factory=list, alias="CORS_ORIGINS")
+
+    # DATABASE
+    database_url: str = Field(
+        alias="DATABASE_URL",
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/ai_research_db",
+    )
+
+    db_pool_size: int = Field(default=10, alias="DB_POOL_SIZE")
+
+    db_max_overflow: int = Field(default=20, alias="DB_MAX_OVERFLOW")
+
+    db_pool_recycle: int = Field(default=3600, alias="DB_POOL_RECYCLE")
+
+    @field_validator("database_url")
+    @classmethod
+    def validate_db_url(cls, v: str) -> str:
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
     @property
     def is_development(self) -> bool:

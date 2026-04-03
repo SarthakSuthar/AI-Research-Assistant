@@ -43,6 +43,21 @@ dependencies = [
     # Google's unified AI SDK — handles both embedding + LLM calls
     # NOTE: use google-genai, NOT google-generativeai (that's deprecated)
     "google-genai>=1.0.0,<2.0.0",
+
+    # SQLAlchemy 2.0 ORM — maps Python classes to DB tables
+    # async subpackage enables non-blocking DB calls
+    "sqlalchemy[asyncio]>=2.0.0,<3.0.0",
+
+    # asyncpg — pure async PostgreSQL driver
+    # SQLAlchemy uses this under the hood when URL starts with postgresql+asyncpg://
+    "asyncpg>=0.29.0,<1.0.0",
+
+    # pgvector Python client — adds Vector() column type to SQLAlchemy
+    # and registers the <-> distance operators for similarity search
+    "pgvector>=0.3.0,<1.0.0",
+
+    # Alembic — database migration tool built specifically for SQLAlchemy
+    "alembic>=1.13.0,<2.0.0",
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
