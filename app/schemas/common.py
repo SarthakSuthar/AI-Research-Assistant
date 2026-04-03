@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class ErrorResponse(BaseModel):
-    error: str
+    error: bool
     message: str
     code: int
 

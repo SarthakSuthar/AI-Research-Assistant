@@ -27,7 +27,7 @@ dependencies = [
     "python-multipart>=0.0.9,<1.0.0",
 
     # Faster JSON serializer (replaces stdlib json) — used as FastAPI default
-    "orjson>=3.10.0,<4.0.0",
+    # "orjson>=3.10.0,<4.0.0", deprecated, not needed
 
     # Structured (JSON-based) logging — produces machine-readable logs for
     # log aggregators like Datadog, CloudWatch, Loki
