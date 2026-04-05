@@ -5,3 +5,4 @@ class HealthResponse(BaseModel):
     status: str
     service: str
     environment: str
+    database: str = "ok"

@@ -1,9 +1,12 @@
+import structlog
 from fastapi import APIRouter
+from sqlalchemy import text
 
-from app.core.config import get_settings
+from app.api.deps import DbSession, Settings
 from app.schemas.health import HealthResponse
 
 router = APIRouter(tags=["Health"])
+logger = structlog.get_logger()
 
 
 @router.get(
@@ -12,10 +15,19 @@ router = APIRouter(tags=["Health"])
     summary="Health Check",
     description="Returns service status. Used by load balancers and monitoring tools.",
 )
-async def health_check() -> HealthResponse:
-    settings = get_settings()
+async def health_check(settings: Settings, db: DbSession) -> HealthResponse:
+
+    db_status = "ok"
+
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception as e:
+        await logger.awarning("database health check failed", error=str(e))
+        db_status = "unreachable"
+
     return HealthResponse(
-        status="ok",
+        status="ok" if db_status == "ok" else "degraded",
         service=settings.app_name,
         environment=settings.app_env,
+        database=db_status,
     )

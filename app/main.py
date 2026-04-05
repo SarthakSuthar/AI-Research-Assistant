@@ -1,17 +1,24 @@
 from contextlib import asynccontextmanager
 
+import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.db.session import engine
+
+logger = structlog.get_logger()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
+    await logger.ainfo("Database engine created", pool_size=engine.pool.size())
     yield
+    await engine.dispose()
+    await logger.ainfo("Database engine disposed")
 
 
 def create_app() -> FastAPI:
