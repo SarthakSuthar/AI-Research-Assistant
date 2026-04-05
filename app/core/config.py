@@ -18,18 +18,18 @@ class Settings(BaseSettings):
     app_debug: bool = Field(default=True, alias="APP_DEBUG")
     api_v1_prefix: str = Field(default="/api/v1", alias="API_V1_PREFIX")
 
-    # Google Gemini
+    # MARK: Google Gemini
     google_api_key: str = Field(..., alias="GOOGLE_API_KEY")
 
-    # Logging
+    # MARK: Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         default="INFO", alias="LOG_LEVEL"
     )
 
-    # CORS
+    # MARK: CORS
     cors_origins: list[str] = Field(default_factory=list, alias="CORS_ORIGINS")
 
-    # DATABASE
+    # MARK: DATABASE
     database_url: str = Field(
         alias="DATABASE_URL",
         default="postgresql+asyncpg://postgres:postgres@localhost:5432/ai_research_db",

@@ -2,7 +2,8 @@ import structlog
 from fastapi import APIRouter
 from sqlalchemy import text
 
-from app.api.deps import DbSession, Settings
+from app.api.deps import SettingsDep
+from app.db.session import AsyncSessionFactory
 from app.schemas.health import HealthResponse
 
 router = APIRouter(tags=["Health"])
@@ -15,12 +16,13 @@ logger = structlog.get_logger()
     summary="Health Check",
     description="Returns service status. Used by load balancers and monitoring tools.",
 )
-async def health_check(settings: Settings, db: DbSession) -> HealthResponse:
+async def health_check(settings: SettingsDep) -> HealthResponse:
 
     db_status = "ok"
 
     try:
-        await db.execute(text("SELECT 1"))
+        async with AsyncSessionFactory() as session:
+            await session.execute(text("SELECT 1"))
     except Exception as e:
         await logger.awarning("database health check failed", error=str(e))
         db_status = "unreachable"

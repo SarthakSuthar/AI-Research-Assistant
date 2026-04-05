@@ -10,8 +10,14 @@ def test_health_check_returns_ok(test_client: TestClient) -> None:
     assert body["status"] == "ok"
     assert "service" in body
     assert "environment" in body
+    assert "database" in body
 
 
 def test_health_check_content_type(test_client: TestClient) -> None:
     response = test_client.get("/api/v1/health")
     assert "application/json" in response.headers["content-type"]
+
+
+def test_health_check_database_field(test_client: TestClient) -> None:
+    body = test_client.get("/api/v1/health").json()
+    assert body["database"] in ("ok", "unreachable")
