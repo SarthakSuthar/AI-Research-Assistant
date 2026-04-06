@@ -58,7 +58,14 @@ class DocumentRepository:
         documents = list(result.scalar().all())
 
         return documents, total
-    
+
     async def update_status(
-        
-    ):
+        self, document_id: uuid.UUID, status: DocumentStatus, chunk_count: int | None = None
+    ) -> Document | None:
+        values: dict = {"status": status}
+        if chunk_count is not None:
+            values["chunk_count"] = chunk_count
+
+        await self._db.execute(update(Document).where(Document.id == document_id).values(**values))
+        await self._db.flush()
+        return await self.get_by_id(document_id)
