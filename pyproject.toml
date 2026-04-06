@@ -58,6 +58,10 @@ dependencies = [
 
     # Alembic — database migration tool built specifically for SQLAlchemy
     "alembic>=1.13.0,<2.0.0",
+
+    "pypdf>=4.3.0",          # Pure-Python PDF text extraction (actively maintained)
+    "python-multipart>=0.0.9", # Required by FastAPI for UploadFile / Form parsing
+
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
