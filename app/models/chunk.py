@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import uuid
+from typing import TYPE_CHECKING, Final
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import ForeignKey, Index, Integer, Text
@@ -22,14 +25,15 @@ class Chunk(UUIDPrimaryKeyMixin, TimeStampMixin, Base):
     )
     content: Mapped[str] = ((mapped_column(Text, nullable=False),),)
     chunk_index: Mapped[int] = (mapped_column(Integer, nullable=False),)
-    token_count: Mapped[int | None] = ((mapped_column(Integer, nullable=True),),)
-    embedding: Mapped[list[float] | None] = (
-        mapped_column(Vector(EMBEDDING_DIMENSION), nullable=True),
+    token_count: Mapped[int | None] = (
+        (mapped_column(Integer, nullable=False, server_default="0"),),
     )
-    documnet: Mapped["Document"] = relationship(
+    embedding: Mapped[Vector | None] = (mapped_column(Vector(EMBEDDING_DIMENSION), nullable=True),)
+
+    documnet: Mapped[Document] = relationship(
         "Document",
         back_populates="chunks",
-        lazy="noload",
+        lazy="noload",  # Never auto-load; always explicit joins or subqueries
     )
 
     __table_args__ = (
