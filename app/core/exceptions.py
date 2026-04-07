@@ -10,25 +10,13 @@ class AppException(HTTPException):
         super().__init__(status_code=status_code, detail=detail)
 
 
-class DocumentNotFoundError(AppException):
-    def __init__(self, doc_id: str) -> None:
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Document '{doc_id}' not found",
-        )
+class DocumentNotFoundError(Exception):
+    """Raised when a requested document ID does not exist in the database."""
 
 
-class EmbeddingServiceError(AppException):
-    def __init__(self, reason: str = "Embedding generation failed") -> None:
-        super().__init__(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=reason,
-        )
+class UnsupportedFileTypeError(Exception):
+    """Raised when an uploaded file fails type, size, or content validation."""
 
 
-class UnsupportedFileTypeError(AppException):
-    def __init__(self, mime_type: str) -> None:
-        super().__init__(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"File type '{mime_type}' is not supported. Use PDF or plain text.",
-        )
+class EmbeddingServiceError(Exception):
+    """Raised when the Gemini embedding API fails"""
