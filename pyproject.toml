@@ -5,7 +5,7 @@
 name = "ai-research-assistant-api"
 version = "0.1.0"
 description = "Production-grade RAG API with FastAPI, pgvector, and Gemini"
-requires-python = ">=3.12"  
+requires-python = ">=3.12"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PRODUCTION DEPENDENCIES
@@ -23,100 +23,78 @@ dependencies = [
     # Plugin that adds .env file + environment variable loading to Pydantic
     "pydantic-settings>=2.4.0,<3.0.0",
 
-    # Required by FastAPI to parse multipart/form-data (file uploads in Step 4)
+    # Required by FastAPI to parse multipart/form-data (file uploads)
     "python-multipart>=0.0.9,<1.0.0",
 
-    # Faster JSON serializer (replaces stdlib json) — used as FastAPI default
-    # "orjson>=3.10.0,<4.0.0", deprecated, not needed
-
-    # Structured (JSON-based) logging — produces machine-readable logs for
-    # log aggregators like Datadog, CloudWatch, Loki
+    # Structured (JSON-based) logging
     "structlog>=24.0.0,<25.0.0",
 
-    # Async HTTP client — used for calling external APIs, testing
+    # Async HTTP client
     "httpx>=0.27.0,<1.0.0",
 
     # Retry library with exponential backoff — wraps Gemini API calls
-    # so transient failures don't crash the pipeline (Step 6, 9)
     "tenacity>=8.5.0,<9.0.0",
 
     # Google's unified AI SDK — handles both embedding + LLM calls
-    # NOTE: use google-genai, NOT google-generativeai (that's deprecated)
     "google-genai>=1.0.0,<2.0.0",
 
-    # SQLAlchemy 2.0 ORM — maps Python classes to DB tables
-    # async subpackage enables non-blocking DB calls
+    # SQLAlchemy 2.0 ORM with async support
     "sqlalchemy[asyncio]>=2.0.0,<3.0.0",
 
-    # asyncpg — pure async PostgreSQL driver
-    # SQLAlchemy uses this under the hood when URL starts with postgresql+asyncpg://
+    # Pure async PostgreSQL driver
     "asyncpg>=0.29.0,<1.0.0",
 
-    # pgvector Python client — adds Vector() column type to SQLAlchemy
-    # and registers the <-> distance operators for similarity search
+    # pgvector client — Vector() column type + similarity search operators
     "pgvector>=0.3.0,<1.0.0",
 
-    # Alembic — database migration tool built specifically for SQLAlchemy
+    # Database migration tool for SQLAlchemy
     "alembic>=1.13.0,<2.0.0",
 
-    "pypdf>=4.3.0",          # Pure-Python PDF text extraction (actively maintained)
-    "python-multipart>=0.0.9", # Required by FastAPI for UploadFile / Form parsing
-
+    # Pure-Python PDF text extraction
+    "pypdf>=4.3.0",
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DEVELOPMENT-ONLY DEPENDENCIES
-# Optional group — install with: pip install -e ".[dev]"
+# Install with: uv pip install -e ".[dev]"
 # ─────────────────────────────────────────────────────────────────────────────
 [project.optional-dependencies]
 dev = [
-    # Test runner with async support
     "pytest>=8.0.0,<9.0.0",
     "pytest-asyncio>=0.23.0,<1.0.0",
-
-    # HTTP test client that works with FastAPI (wraps httpx)
     "httpx>=0.27.0,<1.0.0",
-
-    # Ruff = Rust-powered linter + formatter. Replaces flake8, isort, black
-    # in a single tool that runs ~100x faster
     "ruff>=0.6.0,<1.0.0",
-
-    # Static type checker — catches bugs before runtime
     "mypy>=1.11.0,<2.0.0",
-
-    # Runs linter/formatter automatically before every git commit
     "pre-commit>=3.8.0,<4.0.0",
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # BUILD SYSTEM
-# Tells pip HOW to install this package
 # ─────────────────────────────────────────────────────────────────────────────
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# RUFF CONFIG — Linter rules we enforce
+# PACKAGE DISCOVERY — only include app/, exclude alembic/ and tests/
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["alembic*", "tests*"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUFF CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = [
-    "E",     # pycodestyle errors
-    "F",     # pyflakes (undefined names, unused imports)
-    "I",     # isort (import ordering)
-    "B",     # flake8-bugbear (common bugs and design issues)
-    "UP",    # pyupgrade (use modern Python syntax)
-    "N",     # pep8-naming (naming conventions)
-    "ASYNC", # async-specific rules (e.g., no blocking calls in async functions)
-]
+select = ["E", "F", "I", "B", "UP", "N", "ASYNC"]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PYTEST CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
-asyncio_mode = "auto"   # All async test functions run without @pytest.mark.asyncio
-testpaths = ["tests"]   # Only look for tests in the /tests folder
+asyncio_mode = "auto"
+testpaths = ["tests"]

@@ -19,7 +19,26 @@ class Settings(BaseSettings):
     api_v1_prefix: str = Field(default="/api/v1", alias="API_V1_PREFIX")
 
     # MARK: Google Gemini
-    google_api_key: str = Field(..., alias="GOOGLE_API_KEY")
+    gemini_api_key: str = Field(
+        ...,
+        description="Google Gemini API key from https://aistudio.google.com/apikey",
+    )
+
+    gemini_embedding_model: str = Field(
+        default="gemini-embedding-001",
+        description="Embedding model name. Changing this requires a DB migration "
+        "if output_dimensionality also changes.",
+    )
+
+    # 20 texts per API call is a safe default.
+    # Free-tier keys: reduce to 5 to avoid 429s on large documents.
+    # Paid-tier keys: increase to 50-100 for faster ingestion.
+    embedding_batch_size: int = Field(
+        default=5,
+        ge=1,
+        le=100,
+        description="Number of chunk texts sent per embed_content API call.",
+    )
 
     # MARK: Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
@@ -28,6 +47,8 @@ class Settings(BaseSettings):
 
     # MARK: CORS
     cors_origins: list[str] = Field(default_factory=list, alias="CORS_ORIGINS")
+
+    allowed_origins: list[str] = ["*"]
 
     # MARK: DATABASE
     database_url: str = Field(
