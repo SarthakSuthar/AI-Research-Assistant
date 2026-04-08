@@ -1,5 +1,6 @@
 import enum
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import Index, Integer, String, Text
@@ -8,6 +9,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.models.chunk import Chunk
 from app.models.mixins import TimeStampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from app.models.chunk import Chunk
 
 
 class DocumentStatus(enum.StrEnum):
@@ -24,7 +28,7 @@ class Document(UUIDPrimaryKeyMixin, TimeStampMixin, Base):
     content_type: Mapped[str] = mapped_column(String(100), nullable=False)
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    chunk_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    chunk_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False, default=0)
     status: Mapped[DocumentStatus] = mapped_column(
         SAEnum(DocumentStatus, name="document_status"),
         default=DocumentStatus.PENDING,

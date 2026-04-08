@@ -25,6 +25,8 @@ class DocumentRepository:
             content_type=obj_in.content_type,
             raw_text=obj_in.raw_text,
             file_size=obj_in.file_size,
+            status=DocumentStatus.PENDING,
+            chunk_count=0,
         )
         self._db.add(db_document)
         await self._db.flush()
@@ -62,7 +64,7 @@ class DocumentRepository:
     async def update_status(
         self, document_id: uuid.UUID, status: DocumentStatus, chunk_count: int | None = None
     ) -> Document | None:
-        values: dict = {"status": status}
+        values: dict = {"status": status, "updated_at": func.now()}
         if chunk_count is not None:
             values["chunk_count"] = chunk_count
 

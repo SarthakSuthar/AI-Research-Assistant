@@ -15,7 +15,10 @@ class DocumentResponse(BaseModel):
     filename: str
     content_type: str
     file_size: int = Field(description="File size in bytes")
-    chunk_count: int
+    chunk_count: int = Field(
+        description="Number of text chunks produced by the splitter. "
+        "0 while status=pending/processing."
+    )
     status: DocumentStatus
     created_at: datetime
     updated_at: datetime

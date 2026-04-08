@@ -1,9 +1,9 @@
 import uuid
 
 import structlog
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, HTTPException, Query, UploadFile, status
 
-from app.api.deps import DocumentServiceDep
+from app.api.deps import DbSession, DocumentServiceDep
 from app.core.exceptions import DocumentNotFoundError, UnsupportedFileTypeError
 from app.schemas.document import DocumentListResponse, DocumentResponse, DocumentUploadResponse
 
@@ -23,16 +23,15 @@ logger = structlog.get_logger(__name__)
     ),
 )
 async def upload_document(
-    service: DocumentServiceDep,
-    file: UploadFile = File(
-        ..., description="PDF (.pdf) or plain text (.txt) file. Maximum size: 10 MB."
-    ),
+    service: DocumentServiceDep, file: UploadFile, db: DbSession
 ) -> DocumentUploadResponse:
     try:
-        document = await service.upload_document(file)
-        return DocumentUploadResponse(document=DocumentResponse.model_validate(document))
-    except UnsupportedFileTypeError as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
+        return await service.upload_document(file=file, db=db)
+    except UnsupportedFileTypeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
 
 
 @router.get(
@@ -41,26 +40,30 @@ async def upload_document(
     summary="Get document by ID",
     description="Returns document metadata and current processing status.",
 )
-async def get_document(service: DocumentServiceDep, document_id: uuid.UUID) -> DocumentResponse:
+async def get_document(
+    service: DocumentServiceDep,
+    document_id: uuid.UUID,
+    db: DbSession,
+) -> DocumentResponse:
     try:
-        document = await service.get_document(document_id)
-        return DocumentResponse.model_validate(document)
+        return await service.get_document(document_id=document_id, db=db)
     except DocumentNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
-        )
+        ) from e
 
 
 @router.get(
-    "",
+    "/",
     response_model=DocumentListResponse,
     summary="List documents",
     description="Returns a list of documents with pagination.",
 )
 async def list_documents(
+    db: DbSession,
     service: DocumentServiceDep,
     skip: int = Query(default=0, ge=0, description="Number of documents to skip"),
     limit: int = Query(default=20, ge=1, le=100, description="Max records to return (max 100)"),
 ) -> DocumentListResponse:
-    return await service.list_documents(skip=skip, limit=limit)
+    return await service.list_documents(db=db, skip=skip, limit=limit)
