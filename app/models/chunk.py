@@ -12,7 +12,7 @@ from app.db.base import Base
 from app.models.document import Document
 from app.models.mixins import TimeStampMixin, UUIDPrimaryKeyMixin
 
-EMBEDDING_DIMENSION = 1536
+EMBEDDING_DIMENSIONS = 1536
 
 
 class Chunk(UUIDPrimaryKeyMixin, TimeStampMixin, Base):
@@ -28,7 +28,7 @@ class Chunk(UUIDPrimaryKeyMixin, TimeStampMixin, Base):
     token_count: Mapped[int | None] = (
         (mapped_column(Integer, nullable=False, server_default="0"),),
     )
-    embedding: Mapped[Vector | None] = (mapped_column(Vector(EMBEDDING_DIMENSION), nullable=True),)
+    embedding: Mapped[Vector | None] = (mapped_column(Vector(EMBEDDING_DIMENSIONS), nullable=True),)
 
     documnet: Mapped[Document] = relationship(
         "Document",
