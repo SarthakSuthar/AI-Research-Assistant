@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
@@ -8,6 +9,7 @@ from app.db.session import get_db
 from app.repos.document_repository import DocumentRepository
 from app.services.chunking_service import ChunkingService
 from app.services.document_service import DocumentService
+from app.services.embedding_service import EmbeddingService
 
 # -----------------------------------------------------------------------
 # Primitive deps
@@ -41,3 +43,11 @@ def get_document_service(repo: DocumentRepository, service: ChunkingServiceDep) 
 
 
 DocumentServiceDep = Annotated[DocumentService, Depends(DocumentRepoDep)]
+
+
+@lru_cache
+def get_embedding_service() -> EmbeddingService:
+    return EmbeddingService(settings=get_settings())
+
+
+EmbeddingServiceDep = Annotated[EmbeddingService, Depends(get_embedding_service)]
