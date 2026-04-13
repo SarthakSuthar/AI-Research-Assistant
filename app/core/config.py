@@ -40,6 +40,28 @@ class Settings(BaseSettings):
         description="Number of chunk texts sent per embed_content API call.",
     )
 
+    # MARK: Vector Search
+    hnsw_ef_search: int = Field(
+        default=100,
+        ge=40,
+        le=1000,
+        description="HNSW ef_search parameter. Higher = better recall, slower query.",
+    )
+
+    default_top_k: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Number of top similar chunks returned per search query.",
+    )
+
+    default_min_similarity: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Minimum cosine similarity score (0–1) to include in results.",
+    )
+
     # MARK: Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         default="INFO", alias="LOG_LEVEL"
